@@ -1,7 +1,8 @@
-﻿@model IEnumerable<TaskManagement.Models.TaskItem>
+﻿@model TaskManagement.Models.PaginatedList<TaskManagement.Models.TaskItem>
 
 @{
     ViewData["Title"] = "Index";
+    var currentStatus = ViewData["CurrentStatus"] as string;
 }
 
 <h1>Index</h1>
@@ -9,45 +10,89 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
-<table class="table">
+
+<form asp-action="Index" method="get">
+    <p>
+        Search:
+        <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" />
+        <input type="submit" value="Search" class="btn btn-primary" />
+
+        Status:
+        <select name="statusFilter">
+            <option value="">All</option>
+            <option value="Complete" selected="@(currentStatus == "Complete" ? "selected" : null)">Complete</option>
+            <option value="Incomplete" selected="@(currentStatus == "Incomplete" ? "selected" : null)">Incomplete</option>
+        </select>
+
+        <input type="submit" value="Apply" class="btn btn-primary" />
+    </p>
+</form>
+
+<table class="table table-striped">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["TitleSortParm"]" asp-route-pageNumber="@Model.PageIndex">
+                    Title
+                </a>
             </th>
+            <th>Description</th>
             <th>
-                @Html.DisplayNameFor(model => model.Description)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["DateSortParm"]" asp-route-pageNumber="@Model.PageIndex">Due Date
+                </a>
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DueDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsCompleted)
-            </th>
+            <th>Complete</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DueDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsCompleted)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Title</td>
+                <td>@item.Description</td>
+                <td>@item.DueDate.ToShortDateString()</td>
+                <td>
+                    <form asp-action="ToggleComplete" asp-route-id="@item.Id" method="post" style="display:inline">
+                        @if (item.IsCompleted)
+                        {
+                            <button type="submit" class="btn btn-success btn-sm">✓ Complete</button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">Mark Complete</button>
+                        }
+                    </form>
+                </td>
+
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+<div class="pagination">
+    <a asp-action="Index"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       asp-route-statusFilter="@ViewData["CurrentStatus"]"
+       asp-route-pageNumber="@(Model.PageIndex - 1)"
+       class="btn btn-outline-primary mx-2 px-4 @(Model.HasPreviousPage ? "" : "disabled")">
+        Previous
+    </a>
+
+    <span class="mx-2 align-self-center">Page @Model.PageIndex of @Model.TotalPages</span>
+
+    <a asp-action="Index"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       asp-route-statusFilter="@ViewData["CurrentStatus"]"
+       asp-route-pageNumber="@(Model.PageIndex + 1)"
+       class="btn btn-outline-primary mx-2 px-4 @(Model.HasNextPage ? "" : "disabled")">
+        Next
+    </a>
+</div>
