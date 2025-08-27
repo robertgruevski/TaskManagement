@@ -8,9 +8,9 @@ namespace TaskManagement.Models
 		public int Id { get; set; }
 		[Required(ErrorMessage = "Title is required.")]
 		[StringLength(50, ErrorMessage = "Title cannot be longer than 50 characters.")]
-		public string Title { get; set; }
-		[StringLength(300, ErrorMessage = "Description cannot be longer than 200 characters.")]
-		public string Description { get; set; }
+		public string Title { get; set; } = string.Empty;
+		[StringLength(200, ErrorMessage = "Description cannot be longer than 200 characters.")]
+		public string Description { get; set; } = string.Empty;
 		[DisplayName("Due Date")]
 		[DataType(DataType.Date)]
 		[Required(ErrorMessage = "Due date is required.")]

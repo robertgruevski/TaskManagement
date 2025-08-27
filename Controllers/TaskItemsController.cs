@@ -199,6 +199,7 @@ namespace TaskManagement.Controllers
         }
 
 		[HttpPost]
+        [ValidateAntiForgeryToken]
 		public async Task<IActionResult> ToggleComplete(int id)
 		{
 			var task = await _context.Tasks.FindAsync(id);
